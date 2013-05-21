@@ -34,7 +34,7 @@ import org.openjdk.jmh.annotations.State;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MyBenchmark {
+public class OhMySynchronized {
 
     @State(Scope.Benchmark)
     public static class MyState {
