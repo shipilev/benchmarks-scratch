@@ -1,5 +1,6 @@
 package org.sample.api;
 
+import org.apache.commons.math3.stat.inference.TTest;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 import org.openjdk.jmh.annotations.Measurement;
@@ -89,13 +90,19 @@ public class ArrayListBench {
                 int q = (qMin + qMax) / 2;
                 pw.printf(" trying: n=%d, q=%d", n, q);
 
-                double pTime = runPar(n, q);
+                Result pResult = runPar(n, q);
+                double pTime = pResult.getScore();
                 pw.printf(", par=(%.2f ns, %.2f ns/op, %.2f ns/atom)", pTime, pTime / n, pTime / n / q);
 
-                double sTime = runSeq(n, q);
+                Result sResult = runSeq(n, q);
+                double sTime = sResult.getScore();
                 pw.printf(", seq=(%.2f ns, %.2f ns/op, %.2f ns/atom)", sTime, sTime / n, sTime / n / q);
 
                 pw.printf(", speedup=%.2fx\n", sTime / pTime);
+
+                if (!new TTest().tTest(pResult.getStatistics().getValues(), sResult.getStatistics().getValues(), 0.01)) {
+                    pw.println("Hit the equals!");
+                }
 
                 // TODO: Do proper inference, instead of just comparing the averages
                 if (pTime > sTime) {
@@ -110,7 +117,7 @@ public class ArrayListBench {
         }
     }
 
-    public static double runSeq(int n, int q) throws RunnerException {
+    public static Result runSeq(int n, int q) throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(".*ArrayList.*testSeq")
                 .jvmArgs("-Dbenchmark.n=" + n + " -Dbenchmark.q=" + q)
@@ -121,15 +128,15 @@ public class ArrayListBench {
                 .measurementIterations(5)
                 .measurementTime(TimeValue.milliseconds(100))
                 .outputFormat(OutputFormatType.Silent)
-                .forks(5)
+                .forks(1)
                 .build();
 
         RunResult runResult = new Runner(opts).runSingle();
         Result result = runResult.getPrimaryResult();
-        return result.getScore();
+        return result;
     }
 
-    public static double runPar(int n, int q) throws RunnerException {
+    public static Result runPar(int n, int q) throws RunnerException {
         Options opts = new OptionsBuilder()
                 .include(".*ArrayList.*testPar")
                 .jvmArgs("-Dbenchmark.n=" + n + " -Dbenchmark.q=" + q)
@@ -140,12 +147,12 @@ public class ArrayListBench {
                 .measurementIterations(5)
                 .measurementTime(TimeValue.milliseconds(100))
                 .outputFormat(OutputFormatType.Silent)
-                .forks(5)
+                .forks(1)
                 .build();
 
         RunResult runResult = new Runner(opts).runSingle();
         Result result = runResult.getPrimaryResult();
-        return result.getScore();
+        return result;
     }
 
 }
