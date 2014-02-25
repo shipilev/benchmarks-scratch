@@ -47,14 +47,25 @@ public class ThreadIsInterrupted {
     }
 
     @GenerateMicroBenchmark
-    public boolean enabled() {
+    public boolean other_enabled() {
         return thread.isInterrupted();
     }
 
     @GenerateMicroBenchmark
     @Fork(jvmArgsAppend = {"-XX:+UnlockDiagnosticVMOptions", "-XX:DisableIntrinsic=_isInterrupted"})
-    public boolean disabled() {
+    public boolean other_disabled() {
         return thread.isInterrupted();
+    }
+
+    @GenerateMicroBenchmark
+    public boolean current_enabled() {
+        return Thread.currentThread().isInterrupted();
+    }
+
+    @GenerateMicroBenchmark
+    @Fork(jvmArgsAppend = {"-XX:+UnlockDiagnosticVMOptions", "-XX:DisableIntrinsic=_isInterrupted"})
+    public boolean current_disabled() {
+        return Thread.currentThread().isInterrupted();
     }
 
 }
