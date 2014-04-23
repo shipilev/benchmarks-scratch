@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class StringToUTF8 {
 
-    @Param({"1", "10", "100", "1000", "10000", "100000", "1000000"})
+    @Param({"1", "10", "100", "1000", "10000", "100000"})
     private int length;
 
     private String aString;
@@ -74,6 +74,14 @@ public class StringToUTF8 {
         OutputStreamWriter osw = new OutputStreamWriter(bos, "UTF-8");
         osw.append(aString);
         return bos.toByteArray();
+    }
+
+    @GenerateMicroBenchmark
+    public ByteArrayOutputStream getBytesViaWriter_NoCopy() throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        OutputStreamWriter osw = new OutputStreamWriter(bos, "UTF-8");
+        osw.append(aString);
+        return bos;
     }
 
     public static void main(String[] args) throws RunnerException {
